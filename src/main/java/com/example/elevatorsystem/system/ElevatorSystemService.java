@@ -61,15 +61,18 @@ class ElevatorSystemService implements ElevatorSystemFacade {
 
     private void scheduleElevator(PickupRequest pickupRequest) {
         var unoccupiedElevators = elevatorRepository.findUnoccupiedElevators();
+        //TODO cannot add the same request - validation
         if (hasUnoccupiedElevators(unoccupiedElevators)) {
             var elevator = unoccupiedElevators.stream()
                     //TODO extract
                     .min(Comparator.comparingInt(s -> Math.abs(s.getCurrentFloor() - pickupRequest.getPickupFloor())))
                     .get();
             elevator.assignPickup(pickupRequest);
+            //TODO added this remove
+            this.requestsToHandle.remove(pickupRequest);
         } else {
-            if (!requestsToHandle.contains(pickupRequest)){
-                requestsToHandle.add(pickupRequest);
+            if (!this.requestsToHandle.contains(pickupRequest)){
+                this.requestsToHandle.add(pickupRequest);
             }
         }
     }

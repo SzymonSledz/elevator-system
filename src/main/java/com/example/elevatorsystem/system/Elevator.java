@@ -26,6 +26,7 @@ class Elevator {
     public void nextStep() {
         moveFloors();
         if (shouldVisitCurrentFloor()) {
+            //TODO push/pop?
             this.floorsToVisit.remove(0);
             if (floorsToVisit.isEmpty()) {
                 this.status = ElevatorStatus.IDLE;
@@ -38,17 +39,19 @@ class Elevator {
     }
 
     private void assignStatus(PickupRequest pickupRequest) {
-        if (pickupRequest.getPickupFloor() < pickupRequest.getDestinationFloor()) {
-            this.status = ElevatorStatus.MOVING_UP;
-        } else {
+        //TODO and eq?
+        if (pickupRequest.getPickupFloor() < this.currentFloor) {
             this.status = ElevatorStatus.MOVING_DOWN;
+        } else {
+            this.status = ElevatorStatus.MOVING_UP;
         }
     }
 
     private boolean shouldChangeDirection() {
-        var nextStop = floorsToVisit.get(0);
-        return (this.currentFloor < nextStop && this.status.equals(ElevatorStatus.MOVING_DOWN)) ||
-                (this.currentFloor > nextStop && this.status.equals(ElevatorStatus.MOVING_UP));
+        var nextStop = this.floorsToVisit.get(0);
+        return (this.currentFloor > nextStop && this.status.equals(ElevatorStatus.MOVING_UP)) ||
+                (this.currentFloor < nextStop && this.status.equals(ElevatorStatus.MOVING_DOWN)) ||
+                this.status.equals(ElevatorStatus.IDLE);
     }
 
     private void changeDirection() {
@@ -60,7 +63,7 @@ class Elevator {
     }
 
     private boolean shouldVisitCurrentFloor() {
-        return this.floorsToVisit.contains(this.currentFloor);
+        return this.floorsToVisit.get(0).equals(this.currentFloor);
     }
 
     private void moveFloors() {
