@@ -13,8 +13,6 @@ import java.util.List;
 class Elevator {
     private String elevatorId;
     private int currentFloor;
-    //TODO not needed?
-    private int destinationFloor;
     private ElevatorStatus status = ElevatorStatus.IDLE;
     //TODO env variable - number of floors
     private List<Integer> floorsToVisit = new ArrayList<>(15);

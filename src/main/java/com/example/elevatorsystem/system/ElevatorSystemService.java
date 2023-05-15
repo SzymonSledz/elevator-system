@@ -14,7 +14,6 @@ import java.util.List;
 class ElevatorSystemService implements ElevatorSystemFacade {
     private final ElevatorRepository elevatorRepository = new InMemoryElevatorRepository();
     private final ElevatorSystemMapper elevatorSystemMapper = ElevatorSystemMapper.INSTANCE;
-    //TODO queue
     private final LinkedList<PickupRequest> requestsToHandle = new LinkedList<>();
 
     @Override
@@ -42,15 +41,7 @@ class ElevatorSystemService implements ElevatorSystemFacade {
         //TODO work on it and extract
         if (!requestsToHandle.isEmpty()) {
             for (PickupRequest pickupRequest : requestsToHandle) {
-                var unoccupiedElevators = elevatorRepository.findUnoccupiedElevators();
-                if (!unoccupiedElevators.isEmpty()) {
-                    var elevator = unoccupiedElevators.stream()
-                            //TODO extract
-                            .min(Comparator.comparingInt(s -> Math.abs(s.getCurrentFloor() - pickupRequest.getPickupFloor())))
-                            .get();
-                    elevator.assignPickup(pickupRequest);
-                    requestsToHandle.remove(pickupRequest);
-                }
+                scheduleElevator(pickupRequest);
             }
         }
     }
@@ -64,20 +55,26 @@ class ElevatorSystemService implements ElevatorSystemFacade {
 
     @Override
     public void addElevator(ElevatorDto elevatorDto) {
-        //TODO handling exceptions!
+        //TODO handling exceptions - elevator already exists!
         elevatorRepository.save(elevatorSystemMapper.toElevator(elevatorDto));
     }
 
     private void scheduleElevator(PickupRequest pickupRequest) {
         var unoccupiedElevators = elevatorRepository.findUnoccupiedElevators();
-        if (!unoccupiedElevators.isEmpty()) {
+        if (hasUnoccupiedElevators(unoccupiedElevators)) {
             var elevator = unoccupiedElevators.stream()
                     //TODO extract
                     .min(Comparator.comparingInt(s -> Math.abs(s.getCurrentFloor() - pickupRequest.getPickupFloor())))
                     .get();
             elevator.assignPickup(pickupRequest);
         } else {
-            requestsToHandle.add(pickupRequest);
+            if (!requestsToHandle.contains(pickupRequest)){
+                requestsToHandle.add(pickupRequest);
+            }
         }
+    }
+
+    private boolean hasUnoccupiedElevators(List<Elevator> unoccupiedElevators) {
+        return !unoccupiedElevators.isEmpty();
     }
 }

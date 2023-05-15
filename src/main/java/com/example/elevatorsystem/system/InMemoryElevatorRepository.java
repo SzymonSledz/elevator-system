@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 class InMemoryElevatorRepository implements ElevatorRepository {
-    Map<String, Elevator> elevatorMap = new HashMap<>();
+    private final Map<String, Elevator> elevatorMap = new HashMap<>();
 
     @Override
     public void save(Elevator elevator) {
@@ -32,14 +32,14 @@ class InMemoryElevatorRepository implements ElevatorRepository {
     @Override
     public List<Elevator> findUnoccupiedElevators() {
         return elevatorMap.values().stream()
-                .filter(elevator -> !elevator.isMoving())
+                .filter(elevator -> elevator.getStatus().equals(ElevatorStatus.IDLE))
                 .toList();
     }
 
     @Override
     public List<Elevator> findOccupiedElevators() {
         return elevatorMap.values().stream()
-                .filter(Elevator::isMoving)
+                .filter(elevator -> !elevator.getStatus().equals(ElevatorStatus.IDLE))
                 .toList();
     }
 }
