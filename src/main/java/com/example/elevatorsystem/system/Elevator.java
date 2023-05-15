@@ -15,45 +15,73 @@ class Elevator {
     private int currentFloor;
     //TODO not needed?
     private int destinationFloor;
-    private boolean isMoving = false;
+    private ElevatorStatus status = ElevatorStatus.IDLE;
     //TODO env variable - number of floors
     private List<Integer> floorsToVisit = new ArrayList<>(15);
 
     public void assignPickup(PickupRequest pickupRequest) {
         this.floorsToVisit.add(pickupRequest.getPickupFloor());
         this.floorsToVisit.add(pickupRequest.getDestinationFloor());
-        this.isMoving = true;
+        assignStatus(pickupRequest);
     }
 
     public void nextStep() {
-        var nextFloorToVisit = floorsToVisit.get(0);
-        ////
-        moveFloors(nextFloorToVisit);
-        if (this.currentFloor == nextFloorToVisit) {
+        moveFloors();
+        if (shouldVisitCurrentFloor()) {
             this.floorsToVisit.remove(0);
             if (floorsToVisit.isEmpty()) {
-                this.isMoving = false;
+                this.status = ElevatorStatus.IDLE;
+            } else {
+                if (shouldChangeDirection()) {
+                    changeDirection();
+                }
             }
         }
-//        if (this.currentFloor != nextFloorToVisit) {
-//            moveFloors(nextFloorToVisit);
-//        } else {
-//            this.floorsToVisit.remove(0);
-//            if (floorsToVisit.isEmpty()) {
-//                this.isMoving = false;
-//            }
-//        }
     }
 
-    private void moveFloors(int nextFloorToVisit) {
-        if (isMovingUp(nextFloorToVisit)) {
-            this.currentFloor += 1;
+    private void assignStatus(PickupRequest pickupRequest) {
+        if (pickupRequest.getPickupFloor() < pickupRequest.getDestinationFloor()) {
+            this.status = ElevatorStatus.MOVING_UP;
         } else {
-            this.currentFloor -= 1;
+            this.status = ElevatorStatus.MOVING_DOWN;
         }
     }
 
-    private boolean isMovingUp(int nextFloorToVisit) {
-        return this.currentFloor - nextFloorToVisit < 0;
+    private boolean shouldChangeDirection() {
+        var nextStop = floorsToVisit.get(0);
+        return (this.currentFloor < nextStop && this.status.equals(ElevatorStatus.MOVING_DOWN)) ||
+                (this.currentFloor > nextStop && this.status.equals(ElevatorStatus.MOVING_UP));
+    }
+
+    private void changeDirection() {
+        if (isMovingUp()) {
+            this.status = ElevatorStatus.MOVING_DOWN;
+        } else {
+            this.status = ElevatorStatus.MOVING_UP;
+        }
+    }
+
+    private boolean shouldVisitCurrentFloor() {
+        return this.floorsToVisit.contains(this.currentFloor);
+    }
+
+    private void moveFloors() {
+        if (isMovingUp()) {
+            moveUp();
+        } else {
+            moveDown();
+        }
+    }
+
+    private void moveUp() {
+        this.currentFloor += 1;
+    }
+
+    private void moveDown() {
+        this.currentFloor -= 1;
+    }
+
+    private boolean isMovingUp() {
+        return this.status.equals(ElevatorStatus.MOVING_UP);
     }
 }
