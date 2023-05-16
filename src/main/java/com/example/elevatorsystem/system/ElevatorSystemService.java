@@ -4,6 +4,8 @@ import com.example.elevatorsystem.system.dto.ElevatorDto;
 import com.example.elevatorsystem.system.dto.PickupRequestDto;
 import com.example.elevatorsystem.system.exception.ElevatorAlreadyExistsException;
 import com.example.elevatorsystem.system.exception.PickupAndDestinationFloorCannotBeTheSameException;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +15,10 @@ import java.util.List;
 
 @Slf4j
 @Service
+@NoArgsConstructor
+@AllArgsConstructor
 class ElevatorSystemService implements ElevatorSystemFacade {
-    private final ElevatorRepository elevatorRepository = new InMemoryElevatorRepository();
+    private ElevatorRepository elevatorRepository = new InMemoryElevatorRepository();
     private final ElevatorSystemMapper elevatorSystemMapper = ElevatorSystemMapper.INSTANCE;
     private final LinkedList<PickupRequest> requestsToHandle = new LinkedList<>();
 
@@ -48,11 +52,6 @@ class ElevatorSystemService implements ElevatorSystemFacade {
                 .toList();
     }
 
-    private void logElevatorStatuses() {
-        log.debug(this.elevatorRepository.getAll().stream()
-                .toList().toString());
-    }
-
     @Override
     public void addElevator(ElevatorDto elevatorDto) {
         var elevator = elevatorSystemMapper.toElevator(elevatorDto);
@@ -62,6 +61,11 @@ class ElevatorSystemService implements ElevatorSystemFacade {
             throw new ElevatorAlreadyExistsException(String.format("Elevator with id : %s already exists", elevatorId));
         }
         elevatorRepository.save(elevatorSystemMapper.toElevator(elevatorDto));
+    }
+
+    private void logElevatorStatuses() {
+        log.debug(this.elevatorRepository.getAll().stream()
+                .toList().toString());
     }
 
     private void assignPickupRequestsToHandle() {

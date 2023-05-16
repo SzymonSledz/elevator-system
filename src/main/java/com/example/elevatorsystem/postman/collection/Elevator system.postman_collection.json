@@ -1,0 +1,101 @@
+{
+	"info": {
+		"_postman_id": "a4bd8dc1-d4eb-47ef-8598-6c04e8c4d087",
+		"name": "Elevator system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "addElevator",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"elevatorId\" : \"1\", \r\n    \"currentFloor\" : 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/elevator",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"elevator"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/elevator",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"elevator"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "pickup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"pickupFloor\" : 15, \r\n    \"destinationFloor\" : 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/elevator/pickup",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"elevator",
+						"pickup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "step",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/elevator/step",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"elevator",
+						"step"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

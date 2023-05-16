@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PickupRequest {
+class PickupRequest {
     private int pickupFloor;
     private int destinationFloor;
 }

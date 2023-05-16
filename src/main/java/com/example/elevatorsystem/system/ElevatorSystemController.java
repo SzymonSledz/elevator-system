@@ -16,7 +16,6 @@ class ElevatorSystemController {
     ElevatorSystemFacade elevatorSystemFacade;
 
     @PostMapping("/elevator")
-    //TODO zwrocic id w return
     void addElevator(@RequestBody ElevatorDto elevatorDto) {
         elevatorSystemFacade.addElevator(elevatorDto);
     }

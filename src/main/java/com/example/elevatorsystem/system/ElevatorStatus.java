@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-enum ElevatorStatus {
+public enum ElevatorStatus {
     IDLE("Idle"),
-    MOVING_UP("Moving up"),
-    MOVING_DOWN("Moving down");
+    MOVING_UP("MOVING_UP"),
+    MOVING_DOWN("MOVING_DOWN");
 
     private String status;
 }
