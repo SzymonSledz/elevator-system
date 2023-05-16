@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class ElevatorDto {
     private String elevatorId;
     private int currentFloor;
+    private String status;
 }

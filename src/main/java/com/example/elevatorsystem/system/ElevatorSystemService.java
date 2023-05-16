@@ -20,7 +20,7 @@ class ElevatorSystemService implements ElevatorSystemFacade {
 
     @Override
     public void pickup(PickupRequestDto pickupRequestDto) {
-        log.info("Handling new pickup request, pickupFloor : {}, destinationFloor : {}",
+        log.debug("Handling new pickup request, pickupFloor : {}, destinationFloor : {}",
                 pickupRequestDto.getPickupFloor(), pickupRequestDto.getDestinationFloor());
         var pickupRequest = elevatorSystemMapper.toPickupRequest(pickupRequestDto);
 
@@ -49,7 +49,7 @@ class ElevatorSystemService implements ElevatorSystemFacade {
     }
 
     private void logElevatorStatuses() {
-        log.info(this.elevatorRepository.getAll().stream()
+        log.debug(this.elevatorRepository.getAll().stream()
                 .toList().toString());
     }
 

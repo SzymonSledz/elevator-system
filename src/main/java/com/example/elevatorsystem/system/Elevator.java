@@ -14,8 +14,7 @@ class Elevator {
     private String elevatorId;
     private int currentFloor;
     private ElevatorStatus status = ElevatorStatus.IDLE;
-    //TODO env variable - number of floors
-    private List<Integer> floorsToVisit = new ArrayList<>(15);
+    private List<Integer> floorsToVisit = new ArrayList<>(2);
 
     public void assignPickup(PickupRequest pickupRequest) {
         this.floorsToVisit.add(pickupRequest.getPickupFloor());
