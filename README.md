@@ -10,4 +10,4 @@ Service exposes 4 endpoints:
 3. POST /elevator/pickup - to create new pickup
 4. POST /elevator/step - to simulate next step
 
-You can find and import a postman collection of these endpoints [here](src/main/java/com/example/elevatorsystem/postman/collection/Elevator system.postman_collection.json)
+You can find and import a postman collection of these endpoints [here](src/main/java/com/example/elevatorsystem/postman/collection/Elevator-system.postman_collection.json) 
