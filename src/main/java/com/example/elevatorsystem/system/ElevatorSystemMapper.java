@@ -11,6 +11,5 @@ interface ElevatorSystemMapper {
 
     ElevatorDto toElevatorDto(Elevator elevator);
     Elevator toElevator(ElevatorDto elevatorDto);
-    PickupRequestDto toPickupRequestDto(PickupRequest pickupRequest);
     PickupRequest toPickupRequest(PickupRequestDto pickupRequestDto);
 }

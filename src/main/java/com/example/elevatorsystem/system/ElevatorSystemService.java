@@ -2,6 +2,8 @@ package com.example.elevatorsystem.system;
 
 import com.example.elevatorsystem.system.dto.ElevatorDto;
 import com.example.elevatorsystem.system.dto.PickupRequestDto;
+import com.example.elevatorsystem.system.exception.ElevatorAlreadyExistsException;
+import com.example.elevatorsystem.system.exception.PickupAndDestinationFloorCannotBeTheSameException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,15 +20,14 @@ class ElevatorSystemService implements ElevatorSystemFacade {
 
     @Override
     public void pickup(PickupRequestDto pickupRequestDto) {
-        //TODO change string format
-        log.debug(String.format("pickupFloor : %d, destinationFloor : %d",
-                pickupRequestDto.getPickupFloor(), pickupRequestDto.getDestinationFloor()));
-        scheduleElevator(elevatorSystemMapper.toPickupRequest(pickupRequestDto));
-    }
+        log.info("Handling new pickup request, pickupFloor : {}, destinationFloor : {}",
+                pickupRequestDto.getPickupFloor(), pickupRequestDto.getDestinationFloor());
+        var pickupRequest = elevatorSystemMapper.toPickupRequest(pickupRequestDto);
 
-    @Override
-    public void update(String elevatorId, int currentFloor, int destinationFloor) {
-
+        if (pickupRequest.getPickupFloor() == pickupRequest.getDestinationFloor()) {
+            throw new PickupAndDestinationFloorCannotBeTheSameException("Pickup floor cannot be the same as destination floor");
+        }
+        requestsToHandle.add(pickupRequest);
     }
 
     @Override
@@ -36,14 +37,8 @@ class ElevatorSystemService implements ElevatorSystemFacade {
         for (Elevator elevator : elevators) {
             elevator.nextStep();
         }
-        //TODO remove!
-        System.out.println(status());
-        //TODO work on it and extract
-        if (!requestsToHandle.isEmpty()) {
-            for (PickupRequest pickupRequest : requestsToHandle) {
-                scheduleElevator(pickupRequest);
-            }
-        }
+        assignPickupRequestsToHandle();
+        logElevatorStatuses();
     }
 
     @Override
@@ -53,28 +48,55 @@ class ElevatorSystemService implements ElevatorSystemFacade {
                 .toList();
     }
 
+    private void logElevatorStatuses() {
+        log.info(this.elevatorRepository.getAll().stream()
+                .toList().toString());
+    }
+
     @Override
     public void addElevator(ElevatorDto elevatorDto) {
-        //TODO handling exceptions - elevator already exists!
+        var elevator = elevatorSystemMapper.toElevator(elevatorDto);
+        var elevatorId = elevator.getElevatorId();
+
+        if (elevatorRepository.get(elevatorId).isPresent()) {
+            throw new ElevatorAlreadyExistsException(String.format("Elevator with id : %s already exists", elevatorId));
+        }
         elevatorRepository.save(elevatorSystemMapper.toElevator(elevatorDto));
     }
 
-    private void scheduleElevator(PickupRequest pickupRequest) {
-        var unoccupiedElevators = elevatorRepository.findUnoccupiedElevators();
-        //TODO cannot add the same request - validation
-        if (hasUnoccupiedElevators(unoccupiedElevators)) {
-            var elevator = unoccupiedElevators.stream()
-                    //TODO extract
-                    .min(Comparator.comparingInt(s -> Math.abs(s.getCurrentFloor() - pickupRequest.getPickupFloor())))
-                    .get();
-            elevator.assignPickup(pickupRequest);
-            //TODO added this remove
-            this.requestsToHandle.remove(pickupRequest);
-        } else {
-            if (!this.requestsToHandle.contains(pickupRequest)){
-                this.requestsToHandle.add(pickupRequest);
-            }
+    private void assignPickupRequestsToHandle() {
+        if (!requestsToHandle.isEmpty()) {
+            requestsToHandle.removeIf(this::scheduleElevator);
         }
+    }
+
+    private boolean scheduleElevator(PickupRequest pickupRequest) {
+        var unoccupiedElevators = elevatorRepository.findUnoccupiedElevators();
+
+        if (isElevatorAlreadyHandlingSameRequest(pickupRequest)) {
+            return true;
+        }
+        if (hasUnoccupiedElevators(unoccupiedElevators)) {
+            findElevatorWithMinimumDistanceAndAssignPickup(pickupRequest, unoccupiedElevators);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void findElevatorWithMinimumDistanceAndAssignPickup(PickupRequest pickupRequest, List<Elevator> unoccupiedElevators) {
+        var elevator = unoccupiedElevators.stream()
+                .min(distanceToPickupFloor(pickupRequest))
+                .get();
+        elevator.assignPickup(pickupRequest);
+    }
+
+    private static Comparator<Elevator> distanceToPickupFloor(PickupRequest pickupRequest) {
+        return Comparator.comparingInt(element -> Math.abs(element.getCurrentFloor() - pickupRequest.getPickupFloor()));
+    }
+
+    private boolean isElevatorAlreadyHandlingSameRequest(PickupRequest pickupRequest) {
+        return elevatorRepository.isHandlingRequest(pickupRequest).isPresent();
     }
 
     private boolean hasUnoccupiedElevators(List<Elevator> unoccupiedElevators) {

@@ -24,9 +24,7 @@ class Elevator {
     }
 
     public void nextStep() {
-        moveFloors();
         if (shouldVisitCurrentFloor()) {
-            //TODO push/pop?
             this.floorsToVisit.remove(0);
             if (floorsToVisit.isEmpty()) {
                 this.status = ElevatorStatus.IDLE;
@@ -36,10 +34,12 @@ class Elevator {
                 }
             }
         }
+        if (isMoving()) {
+            moveFloors();
+        }
     }
 
     private void assignStatus(PickupRequest pickupRequest) {
-        //TODO and eq?
         if (pickupRequest.getPickupFloor() < this.currentFloor) {
             this.status = ElevatorStatus.MOVING_DOWN;
         } else {
@@ -49,12 +49,19 @@ class Elevator {
 
     private boolean shouldChangeDirection() {
         var nextStop = this.floorsToVisit.get(0);
-        return (this.currentFloor > nextStop && this.status.equals(ElevatorStatus.MOVING_UP)) ||
-                (this.currentFloor < nextStop && this.status.equals(ElevatorStatus.MOVING_DOWN)) ||
-                this.status.equals(ElevatorStatus.IDLE);
+        return isAboveNextStopAndIsMovingUp(nextStop) ||
+                isBelowNextStopAndIsMovingDown(nextStop) ||
+                !isMoving();
     }
 
     private void changeDirection() {
+        if (!isMoving()) {
+            if (this.currentFloor > this.floorsToVisit.get(0)) {
+                this.status = ElevatorStatus.MOVING_DOWN;
+            } else {
+                this.status = ElevatorStatus.MOVING_UP;
+            }
+        }
         if (isMovingUp()) {
             this.status = ElevatorStatus.MOVING_DOWN;
         } else {
@@ -84,5 +91,17 @@ class Elevator {
 
     private boolean isMovingUp() {
         return this.status.equals(ElevatorStatus.MOVING_UP);
+    }
+
+    private boolean isMoving() {
+        return !this.status.equals(ElevatorStatus.IDLE);
+    }
+
+    private boolean isBelowNextStopAndIsMovingDown(Integer nextStop) {
+        return this.currentFloor < nextStop && !isMovingUp();
+    }
+
+    private boolean isAboveNextStopAndIsMovingUp(Integer nextStop) {
+        return this.currentFloor > nextStop && isMovingUp();
     }
 }

@@ -1,8 +1,7 @@
 package com.example.elevatorsystem.system;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Predicate;
 
 class InMemoryElevatorRepository implements ElevatorRepository {
     private final Map<String, Elevator> elevatorMap = new HashMap<>();
@@ -15,12 +14,11 @@ class InMemoryElevatorRepository implements ElevatorRepository {
     }
 
     @Override
-    public Elevator get(String elevatorId) {
+    public Optional<Elevator> get(String elevatorId) {
         return elevatorMap.entrySet().stream()
                 .filter(elevator -> elevator.getKey().equals(elevatorId))
-                .findFirst()
-                .orElseThrow()
-                .getValue();
+                .map(Map.Entry::getValue)
+                .findFirst();
     }
 
     @Override
@@ -41,5 +39,24 @@ class InMemoryElevatorRepository implements ElevatorRepository {
         return elevatorMap.values().stream()
                 .filter(elevator -> !elevator.getStatus().equals(ElevatorStatus.IDLE))
                 .toList();
+    }
+
+    @Override
+    public Optional<Elevator> isHandlingRequest(PickupRequest pickupRequest) {
+        var pickupFloor = pickupRequest.getPickupFloor();
+        var destinationFloor = pickupRequest.getDestinationFloor();
+
+        return this.findOccupiedElevators().stream()
+                .filter(isGoingToGivenFloors(pickupFloor, destinationFloor))
+                .filter(isGoingToGivenFloorsInCorrectOrder(pickupFloor, destinationFloor))
+                .findFirst();
+    }
+
+    private static Predicate<Elevator> isGoingToGivenFloorsInCorrectOrder(int pickupFloor, int destinationFloor) {
+        return elevator -> elevator.getFloorsToVisit().get(0).equals(pickupFloor) && elevator.getFloorsToVisit().get(1).equals(destinationFloor);
+    }
+
+    private static Predicate<Elevator> isGoingToGivenFloors(int pickupFloor, int destinationFloor) {
+        return elevator -> new HashSet<>(elevator.getFloorsToVisit()).containsAll(List.of(pickupFloor, destinationFloor));
     }
 }

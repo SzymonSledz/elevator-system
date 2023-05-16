@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface ElevatorSystemFacade {
     void pickup(PickupRequestDto pickupRequestDto);
-    void update(String elevatorId, int currentFloor, int destinationFloor);
     void step();
     List<ElevatorDto> status();
     void addElevator(ElevatorDto elevatorDto);
